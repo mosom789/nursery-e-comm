@@ -1,0 +1,122 @@
+@if (product) {
+  <div class="max-w-5xl mx-auto p-6 bg-white mt-10 rounded-lg shadow-md">
+    <div class="grid md:grid-cols-2 gap-8">
+      
+      <!-- 🖼️ Product Gallery -->
+      <div>
+        <div class="mb-4">
+          <img [src]="mainImage || product.images[0] || '/assets/images/no-image.jpg'"
+               class="w-full h-80 object-cover rounded-lg shadow-sm">
+        </div>
+        <div class="flex space-x-3">
+          <img *ngFor="let img of product.images"
+               [src]="img"
+               class="w-24 h-24 object-cover rounded-lg cursor-pointer border border-gray-300 hover:scale-105 transition"
+               (click)="setMainImage(img)">
+        </div>
+      </div>
+
+      <!-- 🧾 Product Info -->
+      <div>
+        <h1 class="text-3xl font-bold mb-2">{{ product.name }}</h1>
+        <p class="text-gray-600 mb-4">{{ product.shortDescription }}</p>
+
+        <!-- 💰 Price & Discount -->
+        <div class="flex items-baseline gap-2 mb-3">
+          <span class="text-xl font-bold text-black">
+            ₹{{ product.price - (product.price * product.discount / 100) }}
+          </span>
+
+          <span *ngIf="product.discount > 0"
+                class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
+            {{ product.discount }}% Off
+          </span>
+
+          @if (product.discount > 0) {
+            <span class="text-gray-600 text-sm line-through">
+              ₹{{ product.price }}
+            </span>
+          }
+
+          <span class="ml-auto bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded">
+            Free Delivery
+          </span>
+        </div>
+
+        <!-- ❤️ Wishlist & 🛒 Cart Buttons -->
+        <div class="flex items-center gap-4 mt-5">
+          <!-- Wishlist Button -->
+          <button
+            mat-icon-button
+            aria-label="Add to wishlist"
+            class="p-2 rounded-full border border-gray-300 hover:bg-red-100 transition"
+            (click)="addToWishlist(product); $event.stopPropagation()">
+            <mat-icon class="text-red-600">
+              {{ isInWishlist(product) ? 'favorite' : 'favorite_border' }}
+            </mat-icon>
+          </button>
+
+          <!-- Cart Button -->
+          <button
+            mat-icon-button
+            aria-label="Add to cart"
+            class="p-2 rounded-full border border-gray-300 hover:bg-green-100 transition"
+            (click)="addToCart(product); $event.stopPropagation()">
+            <mat-icon class="text-green-600">
+              {{ isProductInCart(product._id!) ? 'remove_shopping_cart' : 'add_shopping_cart' }}
+            </mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📄 Product Description -->
+    <div class="mt-10">
+      <h2 class="text-2xl font-bold mb-3">Product Description</h2>
+      <p class="text-gray-700 leading-relaxed">
+        {{ product.description }}
+      </p>
+    </div>
+
+    <!-- 🛍️ Similar Products -->
+    @if (similarProducts.length) {
+      <h2 class="text-2xl font-bold mb-4 mt-10">Similar Products</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        @for (product of similarProducts; track $index) {
+          <app-product-card [product]="product"></app-product-card>
+        }
+      </div>
+    }
+
+    <!-- ⭐ Customer Reviews -->
+    <div class="mt-10">
+      <h2 class="text-2xl font-bold mb-4">Customer Reviews</h2>
+
+      <div class="space-y-6">
+        <div class="p-4 bg-gray-50 rounded-lg shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <p class="font-semibold">John Doe</p>
+            <p class="text-yellow-500">★★★★☆</p>
+          </div>
+          <p class="text-gray-700">Great product! Works exactly as described. Highly recommend.</p>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <p class="font-semibold">Jane Smith</p>
+            <p class="text-yellow-500">★★★★★</p>
+          </div>
+          <p class="text-gray-700">Excellent quality and fast shipping. Will buy again.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="text-center py-20 text-gray-500">
+    <mat-icon class="text-4xl mb-2">hourglass_empty</mat-icon>
+    <p>Loading product details...</p>
+  </div>
+}
+
+
+<!-- <div *ngIf="product"> <div class="mb-4"> <img [src]="mainImage" class="w-full h-72 object-cover rounded-lg"> </div> <div class="flex space-x-4"> <img *ngFor="let img of product.images" [src]="img" class="w-24 h-24 object-cover rounded-lg cursor-pointer border border-gray-300" (click)="setMainImage(img)"> </div> </div> -->

@@ -1,0 +1,62 @@
+<header class="header bg-white shadow-md">
+  <!-- Top Line -->
+  <div class="header__top flex justify-between items-center px-8 py-4">
+    
+    <!-- Logo -->
+    <div class="header__logo text-2xl font-bold text-green-700">
+      <a routerLink="/">ShopEase</a>
+    </div>
+
+    <!-- Search -->
+     @if (authService.isLoggedIn && !authService.isAdmin ) {
+    <div class="header__search flex items-center">
+      <input
+        type="text"
+        placeholder="Search products..."
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch($event)"
+        class="flex-1 px-4 py-2 outline-none"
+      />
+      <button class="bg-green-600 px-4 py-2 text-white hover:bg-green-700 transition">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+  }
+
+    <!-- Profile / Auth Section -->
+    <div class="header__profile flex items-center space-x-4 text-gray-700 font-medium">
+
+      @if (authService.isAdmin) {
+        <a routerLink="/admin">{{ authService.userName }}</a>
+      } @else {
+        <a routerLink="/profile">{{ authService.userName }}</a>
+      }
+
+      @if (authService.isLoggedIn ) {
+        @if(!authService.isAdmin){
+        <a routerLink="/cart" class="relative">
+          <mat-icon class="text-gray-700 hover:text-green-600 transition">add_shopping_cart</mat-icon>
+        </a>
+        <a routerLink="/orders">Orders</a>
+      }
+        <a (click)="logout()" class="cursor-pointer hover:text-red-600">Logout</a>
+      } @else {
+        <a routerLink="/login" class="hover:text-green-600">Login</a>
+        <a routerLink="/register" class="hover:text-green-600">Signup</a>
+      }
+    </div>
+  </div>
+
+  <!-- Bottom Line (Category Navigation) -->
+  @if (authService.isLoggedIn && !authService.isAdmin ) {
+    <nav class="header__bottom bg-gray-100 py-2">
+      <ul class="flex justify-center space-x-6">
+        @for (category of (categoryList$ | async) ?? []; track category._id) {
+          <li (click)="searchCategory(category._id!)" class="cursor-pointer hover:text-green-700 transition">
+            <a>{{ category.name }}</a>
+          </li>
+        }
+      </ul>
+    </nav>
+  }
+</header>

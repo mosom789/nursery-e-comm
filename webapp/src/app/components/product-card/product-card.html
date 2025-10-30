@@ -1,0 +1,99 @@
+ <div class="flex flex-wrap gap-4 p-4 bg-gray-50 justify-center h-full" [routerLink]="'/product/'+ product._id">
+
+                <!-- Product Card -->
+                
+                    <article class="flex flex-col justify-between w-full max-w-xs bg-white rounded-xl shadow-md overflow-hidden font-sans text-gray-900">
+
+                    <!-- Image + Badge -->
+                    <div class="relative">
+                        <img [src]="product.images[0]" alt="{{ product.name }}" class="w-full h-56 object-cover" />
+
+                        <!-- Discount Badge -->
+                        @if (product.discount > 0) {
+                        <span class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md">
+                            -{{ product.discount }}%
+                        </span>
+                        }
+
+                        <!-- Wishlist button -->
+                        <!-- <button class="absolute top-3 right-3 bg-white/90 p-2 rounded-lg shadow-md hover:bg-white cursor-pointer" aria-label="Add to wishlist">
+                        ♥
+                        </button> -->
+                     
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-4">
+                        <h3 class="text-base font-bold mb-1">{{ product.name }}</h3>
+                        <p class="text-sm text-gray-600 mb-2">{{ product.shortDescription }}</p>
+
+                        <!-- Rating & reviews -->
+                        <div class="flex items-center gap-2 mb-2">
+                        <div class="text-yellow-400 text-sm" aria-hidden="true">★★★★☆</div>
+                        <div class="text-gray-500 text-xs">4.2 • 1.4k reviews</div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="flex items-baseline gap-2 mb-3">
+                        <!-- Discounted Price -->
+                        <span class="text-lg font-bold text-black-600">
+                            ₹{{ product.price - (product.price * product.discount / 100) }}
+                        </span>
+
+                        <!-- Original Price -->
+                        @if (product.discount > 0) {
+                            <span class="text-gray-600 text-sm line-through">
+                            ₹{{ product.price }}
+                            </span>
+                        }
+
+                        <span class="ml-auto text-green-600 text-xs font-semibold">Free delivery</span>
+                        </div>
+
+                        
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-16 mt-4">
+                        <!-- Add to Cart -->
+                        <button
+                            mat-icon-button
+                            aria-label="Add to cart"
+                            class="p-2 rounded-full border border-gray-300 hover:bg-red-50 transition"
+                            (click)="addToCart(product); $event.stopPropagation()"
+                            >
+                            <!-- @if (isProductInCart(product._id!)) {
+                            <mat-icon class="text-green-600">remove_shopping_cart</mat-icon>
+                            } @else {
+                            <mat-icon class="text-green-600">add_shopping_cart</mat-icon>    
+                            } -->
+                             
+                            <mat-icon class="text-green-600">
+                            {{ isProductInCart(product._id!) ? 'remove_shopping_cart' : 'add_shopping_cart' }}
+                            </mat-icon>
+                        </button>
+
+                        <!-- Wishlist Button -->
+                        <button
+                            mat-icon-button
+                            aria-label="Add to wishlist"
+                            class="p-2 rounded-full border border-gray-300 hover:bg-red-50 transition"
+                            (click)="addToWishlist(product); $event.stopPropagation()"
+                        >
+                            <!-- @if (isInWishlist(product)) {
+                                 <mat-icon class="text-red-600">favorite</mat-icon>
+                             } @else {
+                                 <mat-icon class="text-red-600">favorite_border</mat-icon>
+                             } -->
+
+                        <mat-icon class="text-red-600">
+                            {{ isInWishlist(product) ? 'favorite' : 'favorite_border' }}
+                        </mat-icon>
+
+                        </button>
+                        </div>
+
+                    </div>
+                    </article>
+
+                </div>
+

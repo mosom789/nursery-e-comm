@@ -1,0 +1,7 @@
+img {
+  transition: transform 6s ease, filter 1s ease;
+}
+img:hover {
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}

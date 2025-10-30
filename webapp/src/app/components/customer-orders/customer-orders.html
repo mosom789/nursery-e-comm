@@ -1,0 +1,58 @@
+<div class="max-w-5xl mx-auto p-6">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">My Orders</h2>
+
+<div *ngFor="let order of orders; trackBy: trackByOrderId" 
+     class="bg-white border border-gray-200 rounded-2xl p-6 mb-8 shadow-md hover:shadow-lg transition-shadow duration-300">
+
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+    <h3 class="text-xl font-semibold text-gray-800">
+      Order <span class="text-green-600 font-mono">#{{ order._id ? order._id.slice(-6).toUpperCase() : '' }}</span>
+    </h3>
+    <p class="text-sm text-gray-500 mt-2 sm:mt-0">
+      Placed on: <span class="font-medium text-gray-700">{{ order.date | date:'medium' }}</span>
+    </p>
+  </div>
+
+  <div class="divide-y divide-gray-100">
+    <div *ngFor="let item of order.items; trackBy: trackByItemId" class="flex flex-col sm:flex-row sm:items-center justify-between py-4 gap-4">
+      <div class="flex items-center gap-4 w-full sm:w-auto">
+        <img
+          [src]="item.product.images[0]"
+          alt="{{ item.product.name }}"
+          class="w-24 h-24 object-cover rounded-xl border border-gray-100"
+        />
+        <div class="flex-1">
+          <h4 class="text-lg font-semibold text-gray-800">{{ item.product.name }}</h4>
+          <p class="text-sm text-gray-500 mb-1">{{ item.product.shortDescription }}</p>
+          <p class="text-sm font-semibold text-gray-900">₹{{ item.product.price }}</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto">
+        <span class="px-4 py-1 bg-gray-100 rounded-full text-gray-700 font-medium">
+          Qty: {{ item.quantity }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 flex items-center justify-between border-t pt-4">
+    <p class="text-sm text-gray-600">Payment Type: 
+      <span class="font-medium text-gray-800 uppercase">{{ order.paymentType }}</span>
+    </p>
+    <p class="text-sm text-gray-600">Status: 
+      <span class="px-3 py-1 rounded-full text-white text-xs font-semibold"
+        [ngClass]="{
+          'bg-green-500': order.status === 'completed',
+          'bg-yellow-500': order.status === 'inprogress',
+          'bg-red-500': order.status === 'cancelled',
+          'bg-blue-500':order.status ==='pending'
+        }">
+        {{ order.status }}
+      </span>
+    </p>
+  </div>
+</div>
+</div>
+
+

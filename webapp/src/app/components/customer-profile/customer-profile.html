@@ -1,0 +1,44 @@
+<div class="flex justify-center w-full mt-20">
+  <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-lg">
+    <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Profile</h2>
+
+    <!-- Basic Info -->
+    <div class="mb-6">
+      <p><strong>Name:</strong> {{ authService.userName }}</p>
+      <p><strong>Email:</strong> {{ authService.userEmail }}</p>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Address Section -->
+    <h3 class="text-xl font-semibold mb-4">Shipping Address</h3>
+
+    <form (ngSubmit)="saveAddress()" *ngIf="!addressSaved" class="space-y-3">
+      <input [(ngModel)]="address.fullName" name="fullName" placeholder="Full Name" class="w-full border rounded p-2" required />
+      <input [(ngModel)]="address.phone" name="phone" placeholder="Phone Number" class="w-full border rounded p-2" required />
+      <input [(ngModel)]="address.street" name="street" placeholder="Street Address" class="w-full border rounded p-2" required />
+      <input [(ngModel)]="address.city" name="city" placeholder="City" class="w-full border rounded p-2" required />
+      <input [(ngModel)]="address.pincode" name="pincode" placeholder="Pincode" class="w-full border rounded p-2" required />
+
+      <button class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700" type="submit">
+        Save Address
+      </button>
+    </form>
+
+    <!-- Saved Address Display -->
+    <div *ngIf="addressSaved" class="space-y-2">
+      <p><strong>{{ address.fullName }}</strong></p>
+      <p>{{ address.street }}, {{ address.city }} - {{ address.pincode }}</p>
+      <p>📞 {{ address.phone }}</p>
+
+      <button
+        class="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        (click)="editAddress()"
+      >
+        Edit Address
+      </button>
+    </div>
+  </div>
+</div>
+
+
