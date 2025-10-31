@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, ViewChild } from '@angular/core';
 import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
 import {MatSort, MatSortModule} from '@angular/material/sort';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
@@ -21,32 +21,47 @@ export class Products {
 
      displayedColumns: string[] = ['id', 'name', 'shortDescription', 'price', 'discount', 'action'];
       dataSource: MatTableDataSource<Product>;
+      products: Product[] = [];
 
       @ViewChild(MatPaginator) paginator!: MatPaginator;
       @ViewChild(MatSort) sort!: MatSort;
 
       // (product) comes from services
-      productService=inject(ProductService);  
+      productService=inject(ProductService); 
+      private cdr = inject(ChangeDetectorRef); 
 
       constructor() {
-       
-        this.dataSource = new MatTableDataSource([] as any);
+        this.dataSource = new MatTableDataSource<Product>([]);
       }
 
       ngOnInit() {
-         this.getServerData();
+        //  this.getServerData();
       }
 
       private getServerData() {
-        this.productService.getAllProducts().subscribe((result) => {
-          console.log(result);
-          this.dataSource.data = result;
-        });
+    console.log('Fetching products...');
+    this.productService.getAllProducts().subscribe({
+      next: (result) => {
+        console.log('Products received:', result);
+        console.log('Number of products:', result.length);
+        
+        this.products = result;
+        this.dataSource.data = result;
+        
+        this.cdr.detectChanges();
+        
+        console.log('DataSource data:', this.dataSource.data);
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
       }
+    });
+  }
 
       ngAfterViewInit() {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+        this.getServerData();
       }
 
       applyFilter(event: Event) {

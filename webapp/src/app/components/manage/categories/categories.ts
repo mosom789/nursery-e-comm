@@ -67,50 +67,133 @@
 
 
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../../services/categoryService';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Category } from '../../../types/category';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'app-categories',imports:[CommonModule],
+  selector: 'app-categories',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './categories.html',
   styleUrls: ['./categories.scss'],
 })
-export class Categories {
+export class Categories implements OnInit, OnDestroy {
   categories: Category[] = [];
   filteredCategories: Category[] = [];
   searchText: string = '';
+  isLoading = true;
+  error: string | null = null;
 
-  categoryService = inject(CategoryService);
-  router = inject(Router);
+  private categoryService = inject(CategoryService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+  private destroy$ = new Subject<void>();
 
   ngOnInit() {
-    this.getCategories();
+    console.log('Categories ngOnInit called');
+    console.log('CategoryService exists:', !!this.categoryService);
+    
+    setTimeout(() => {
+      this.getCategories();
+    }, 0);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getCategories() {
-    this.categoryService.getCategories().subscribe((result) => {
-      this.categories = result;
-      this.filteredCategories = result;
-    });
+    console.log('Loading categories...');
+    this.isLoading = true;
+    this.error = null;
+
+    this.categoryService.getCategories()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          console.log('✅ Categories received:', result);
+          console.log('Number of categories:', result?.length);
+
+          this.categories = Array.isArray(result) ? result : [];
+          this.filteredCategories = [...this.categories];
+          
+          console.log('Categories assigned:', this.categories.length);
+          console.log('Filtered categories:', this.filteredCategories.length);
+
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('❌ Error loading categories:', error);
+          console.error('Error details:', {
+            message: error.message,
+            status: error.status,
+            statusText: error.statusText,
+            url: error.url,
+            error: error.error
+          });
+
+          this.error = 'Failed to load categories. Please try again.';
+          this.isLoading = false;
+          this.categories = [];
+          this.filteredCategories = [];
+          this.cdr.detectChanges();
+        },
+        complete: () => {
+          console.log('Categories loading completed');
+        }
+      });
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value.toLowerCase();
     this.searchText = filterValue;
+    
+    console.log('Filtering categories with:', filterValue);
+    
     this.filteredCategories = this.categories.filter((cat) =>
       cat.name.toLowerCase().includes(filterValue)
     );
+    
+    console.log('Filtered results:', this.filteredCategories.length);
+    this.cdr.detectChanges();
   }
 
   delete(id: string) {
     if (confirm('Are you sure you want to delete this category?')) {
-      this.categoryService.deleteCategoryById(id).subscribe(() => {
-        alert('Category Deleted');
-        this.getCategories();
-      });
+      console.log('Deleting category:', id);
+
+      this.categoryService.deleteCategoryById(id)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            console.log('✅ Category deleted successfully:', response);
+            alert('Category Deleted Successfully');
+            this.getCategories();
+          },
+          error: (error) => {
+            console.error('❌ Error deleting category:', error);
+            alert('Failed to delete category. Please try again.');
+          }
+        });
     }
   }
+
+  navigateToAdd() {
+    this.router.navigate(['/admin/categories/add']);
+  }
+
+  navigateToEdit(id: string) {
+    this.router.navigate(['/admin/categories', id]);
+  }
+
+  retryLoading() {
+    this.getCategories();
+  }
 }
+
