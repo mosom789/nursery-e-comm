@@ -1,6 +1,6 @@
 const Order = require("./../db/order")
 
-async function addOrder(userId,orderModel){
+async function addOrder(userId, orderModel){
     let order = new Order({
         ...orderModel,
         userId:userId,

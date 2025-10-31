@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CartService } from '../../services/cartService';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
@@ -21,19 +21,37 @@ export class ShoppingCart implements OnInit {
   paymentType: string = 'COD';
   addreform: any = { city: '', zip: '' };
   totalAmount: number = 0;
+  isLoading = true;
 
   constructor(private cartService: CartService, private router: Router) {}
   orderService=inject(OrderService)
+  cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
-    this.loadCart();
+    console.log('ShoppingCart ngOnInit');
+    this.cartService.init();
+    
+    // Add a small delay to ensure init completes
+    setTimeout(() => {
+      this.loadCart();
+    }, 100);
   }
 
   loadCart() {
-    this.cartService.getCartitems().subscribe(items => {
-      this.cartItems = items;
-      this.calculateTotals();
-      console.log('Loaded cart items:', this.cartItems);
+    this.cartService.getCartitems().subscribe({
+      next: (items) => {
+        console.log('✅ Cart items received:', items);
+        this.cartItems = items || [];
+        this.calculateTotals();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('❌ Error loading cart:', error);
+        this.isLoading = false;
+        this.cartItems = [];
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -60,18 +78,42 @@ export class ShoppingCart implements OnInit {
 // }
 
   increaseQuantity(item: any) {
-    item.quantity++;
-    this.cartService.addToCart(item.product._id, item.quantity);
-    this.calculateTotals();
+    const newQuantity = item.quantity + 1;
+    console.log(`Increasing quantity for ${item.product.name} to ${newQuantity}`);
+
+    this.cartService.addToCart(item.product._id, 1).subscribe({
+      next: (response) => {
+        console.log('✅ Quantity increased successfully:', response);
+        item.quantity = item.quantity + 1;
+        this.calculateTotals();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('❌ Error increasing quantity:', error);
+        alert('Failed to update quantity');
+      }
+    });
   }
 
   decreaseQuantity(item: any) {
-    if (item.quantity > 1) {
-      item.quantity--;
-      this.cartService.addToCart(item.product._id, item.quantity);
-      this.calculateTotals();
-    }
+  if (item.quantity > 1) {
+    console.log(`Decreasing quantity for ${item.product.name} by 1`);
+
+    // Send -1 to decrease by 1
+    this.cartService.addToCart(item.product._id, -1).subscribe({
+      next: (response) => {
+        console.log('✅ Quantity decreased successfully:', response);
+        item.quantity = item.quantity - 1; // Update local state
+        this.calculateTotals();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('❌ Error decreasing quantity:', error);
+        alert('Failed to update quantity');
+      }
+    });
   }
+}
 
   removeFromCart(item: any) {
     this.cartService.removeFromCart(item.product._id).subscribe(() => {
